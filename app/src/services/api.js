@@ -34,4 +34,11 @@ export default {
   getPlats() {
     return requete('/plats');
   },
+
+  getPlatCategorie(categorieId) {
+    return requete(`/plats?categorieId=${categorieId}`);
+  },
+
+
+ 
 };

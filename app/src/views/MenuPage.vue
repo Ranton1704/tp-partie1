@@ -41,7 +41,8 @@
       <!-- 3. La liste des plats -->
 
       <ion-list v-if="platsFiltres.length > 0">
-        <ion-item v-for="plat in platsFiltres" :key="plat.id">
+        <ion-item v-for="plat in platsFiltres" :key="plat.id" :router-link="`/tabs/menu/${plat.id}`">
+          
           <ion-label>
             <h2>{{ plat.nom }}</h2>
             <p>{{ plat.description }}</p>

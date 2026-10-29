@@ -6,10 +6,13 @@
             </ion-buttons>
             <ion-title>Détail du plat</ion-title>
         </ion-toolbar>
-        
+
         <ion-content>
+            <ion-refresher slot="fixed" @ion-refresh="rafraichir">
+                <ion-refresher-content />
+            </ion-refresher>
             <div v-if="chargement" class="ion-text-center ion-padding">
-                <ion-spinner/>
+                <ion-spinner />
             </div>
 
             <div v-else-if="erreur" class="ion-padding">
@@ -21,32 +24,54 @@
 
             <ion-card>
                 <ion-card-header>
-                    <ion-card-subtitle></ion-card-subtitle>
+                    <ion-card-title color="primary">{{ plat.nom }}</ion-card-title>
                 </ion-card-header>
+                <ion-card-content>
+                    <p>Categories : {{ plat.categorie?.nom }}</p>
+                    <p>{{ plat.description }}</p>
+                    <p>Prix : {{ formatAriary(plat.prix) }}</p>
+                </ion-card-content>
             </ion-card>
         </ion-content>
 
     </ion-page>
 </template>
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useIonRouter } from '@ionic/vue';
-import { IonPage, IonToolbar, IonButtons, IonBackButton, IonTitle,IonContent,IonCard,IonCardHeader,
-         IonCardSubtitle,IonSpinner,IonText,IonButton } from '@ionic/vue';
-
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import {
+    IonPage, IonToolbar, IonButtons, IonBackButton, IonTitle, IonContent, IonCard, IonCardHeader,
+    IonCardSubtitle, IonSpinner, IonText, IonButton, IonCardTitle, IonCardContent,IonRefresher, IonRefresherContent
+} from '@ionic/vue';
 import api from '@/services/api';
-const plats = ref ([]);
+import { formatAriary } from '@/utils/format';
+const plat = ref([]);
+const categories = ref([]);
 const erreur = ref(null);
+const route = useRoute();
+const chargement = ref(true);
 
-const ionRouter = useIonRouter();
 
 async function charger() {
-  try {
-    plats.value = await api.getPlats();
-  } catch (e) {
-    erreur.value = "Impossible de joindre l'API. Est-elle lancée ?";
-    console.error(e);
-  }
+    try {
+        const id = route.params.id;
+        plat.value = await api.getPlatById(id);
+        categories.value = await api.getCategories();
+    } catch (e) {
+        if (e.statut === 404) {
+            erreur.value = "Plat introuvable";
+        } else {
+            erreur.value = "Impossible de joindre l'API. Est-elle lancée ?";
+        }
+        console.error(e);
+    } finally {
+        chargement.value = false;
+    }
+}
+
+async function rafraichir(event) {
+  await charger();
+  event.target.complete();
 }
 
 onMounted(charger);

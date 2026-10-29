@@ -35,10 +35,8 @@ export default {
     return requete('/plats');
   },
 
-  getPlatCategorie(categorieId) {
-    return requete(`/plats?categorieId=${categorieId}`);
-  },
-
-
+  getPlatById(id) {
+    return requete(`/plats/${id}`);
+  }
  
 };

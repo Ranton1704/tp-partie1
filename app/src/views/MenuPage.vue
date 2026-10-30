@@ -52,6 +52,9 @@
             <p>{{ formatAriary(plat.prix) }}</p>
             <ion-badge v-if="!plat.disponible" color="medium">Épuisé</ion-badge>
           </ion-text>
+          <ion-button slot="end" fill="clear" :disabled="!plat.disponible" @click.stop.prevent="ajouterAupanier(plat)">
+            <ion-icon slot="icon-only" :icon="addCircleOutline" />
+          </ion-button>
         </ion-item>
       </ion-list>
       <p v-else class="ion-padding">Aucun plat trouvé</p>
@@ -66,18 +69,19 @@
 import { ref, onMounted, computed } from 'vue';
 import {
   IonPage, IonRefresher, IonRefresherContent, IonSegment, IonSegmentButton, IonBadge, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonList, IonItem, IonLabel, IonSpinner, IonText, IonButton, IonSearchbar
+  IonList, IonItem, IonLabel, IonSpinner, IonText, IonButton, IonSearchbar, IonIcon
 } from '@ionic/vue';
 import api from '@/services/api';
+import { addCircleOutline } from 'ionicons/icons';
 import { formatAriary } from '@/utils/format';
+import { usePanier } from '@/composables/usePanier';
+import { toastController } from '@ionic/vue';
 const categories = ref([]);
 const plat = ref([]);
 const chargement = ref(true);
 const erreur = ref(null);
 const recherche = ref('');
-
 const categorieChoisie = ref('toutes');
-
 
 const platsFiltres = computed(() => {
   return plat.value.filter((plat) => {
@@ -86,6 +90,20 @@ const platsFiltres = computed(() => {
     return correspondRecherche && correspondCategorie;
   });
 });
+
+async function ajouterAupanier(plat){
+  await usePanier().ajouter(plat);
+
+  const toast = await toastController.create({
+      message: `${plat.nom} ajouté au panier`,
+      duration: 1500, position: 'top', color: 'secondary'
+  
+});
+await toast.present();
+
+}
+
+
 
 async function charger() {
   chargement.value = true;
@@ -100,6 +118,7 @@ async function charger() {
     chargement.value = false;
   }
 }
+
 async function rafraichir(event) {
   await charger();
   event.target.complete();

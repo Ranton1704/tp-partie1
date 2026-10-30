@@ -1,25 +1,39 @@
-import { ref, computed} from 'vue';
+import { ref, computed } from "vue";
 
 const lignes = ref([]);
 
-export function usePanier(){
-    function ajouter(plat){
+export function usePanier() {
+  function ajouter(plat) {
+    const ligneExistante = lignes.value.find(l => l.plat.id === plat.id);
 
+    if (ligneExistante) {
+      ligneExistante.quantite++;
+    } else {
+      lignes.value.push({ plat, quantite: 1 });
     }
+  }
 
-    function changerQuantite(platId, delta){
-
+  function changerQuantite(platId, delta) {
+    const index = lignes.value.findIndex((l) => l.plat.id === platId);
+    if (index !== -1) {
+      lignes.value[index].quantite += delta;
+      if (lignes.value[index].quantite <= 0) {
+        lignes.value.splice(index, 1);
+      }
     }
+  }
 
-    function vider(){
-        lignes.values = [];
-    }
+  function vider() {
+    lignes.value = [];
+  }
 
-    const nombresArticles = computed (() =>0
+  const nombreArticles= computed(() =>{
+    return lignes.value.reduce((total, ligne) => total + ligne.quantite, 0);   
+  });
 
-);
-    const total = computed (() =>0
-
-);
-    return { lignes, ajouter, changerQuantite, vider, nombreArticles, total};
+  const total = computed(() =>{
+    return lignes.value.reduce((total, ligne) => total + ligne.plat.prix * ligne.quantite, 0);
+  });
+  
+  return { lignes, ajouter, changerQuantite, vider, nombreArticles, total };
 }

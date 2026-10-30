@@ -30,7 +30,12 @@
                     <p>Categories : {{ plat.categorie?.nom }}</p>
                     <p>{{ plat.description }}</p>
                     <p>Prix : {{ formatAriary(plat.prix) }}</p>
+                    <ion-button slot="end" fill="clear" :disabled="!plat.disponible"
+                        @click.stop.prevent="ajouterAupanier(plat)">
+                      <p>Ajouter au panier: </p><ion-icon slot="icon-only" :icon="addCircleOutline" />
+                    </ion-button>
                 </ion-card-content>
+
             </ion-card>
         </ion-content>
 
@@ -41,16 +46,33 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import {
     IonPage, IonToolbar, IonButtons, IonBackButton, IonTitle, IonContent, IonCard, IonCardHeader,
-    IonCardSubtitle, IonSpinner, IonText, IonButton, IonCardTitle, IonCardContent,IonRefresher, IonRefresherContent
+    IonSpinner, IonText, IonButton, IonCardTitle, IonCardContent, IonRefresher, IonRefresherContent,
+    IonIcon
 } from '@ionic/vue';
 import api from '@/services/api';
 import { formatAriary } from '@/utils/format';
+import { addCircleOutline } from 'ionicons/icons';
 const plat = ref([]);
 const categories = ref([]);
 const erreur = ref(null);
 const route = useRoute();
 const chargement = ref(true);
+import { usePanier } from '@/composables/usePanier';
+import { toastController } from '@ionic/vue';
 
+
+
+async function ajouterAupanier(plat){
+  await usePanier().ajouter(plat);
+
+  const toast = await toastController.create({
+      message: `${plat.nom} ajouté au panier`,
+      duration: 1500, position: 'top', color: 'secondary'
+  
+});
+await toast.present();
+
+}
 
 async function charger() {
     try {
@@ -70,8 +92,8 @@ async function charger() {
 }
 
 async function rafraichir(event) {
-  await charger();
-  event.target.complete();
+    await charger();
+    event.target.complete();
 }
 
 onMounted(charger);

@@ -25,7 +25,6 @@ async function requete(chemin, options = {}) {
   }
   return donnees;
 }
-
 export default {
   getCategories() {
     return requete('/categories');
@@ -37,6 +36,16 @@ export default {
 
   getPlatById(id) {
     return requete(`/plats/${id}`);
-  }
- 
+  },
+
+  creerCommande(commande) {
+    return requete('/commandes', {
+      method: 'POST',
+      body: JSON.stringify(commande),
+    });
+  },
+
+  getCommandes() {
+    return requete('/commandes');
+  },
 };

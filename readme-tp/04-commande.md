@@ -7,7 +7,7 @@
 Saisir le numéro de table, confirmer, envoyer la commande à l'API, gérer les
 erreurs, puis afficher l'historique des commandes.
 
-## 1. L'API
+## 1. L'APId
 
 ```
 POST /api/commandes
